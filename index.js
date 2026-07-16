@@ -16,54 +16,16 @@ const bodyParser = require('body-parser');
 // CONFIG
 const node = 'node.bot-hosting.net'   // CHANGE node to YOUR NODE Ex: prem-eu1  (IF Your Node is prem-eu1 THEN Put prem-eu1 here NOT eu1)
 const monitor = 'node'   // CHANGE node to YOUR NODE Ex: eu1 (IF Your Node is prem-eu1 THEN Put eu1 here NOT prem-eu1)
-const minutes = 1    // INTERVAL OF CHECKS IN MINUTES, DEFAULT 1 MINUTE (3 MINUTES IF RPC TRUE). INCREASE IF NEEDED UPTO MAX 60 MINUTES
-const RPC = false   // DISABLE IF ON Fi (free) NODE or IF YOUR SERVER KEEPS CRASHING RANDOMLY AFTER OR AT PORT CHECK.
+const minutes = 1    // INTERVAL OF CHECKS IN MINUTES, DEFAULT 1 MINUTE. INCREASE IF NEEDED UPTO MAX 60 MINUTES
 const express = require('express');
 const app = express();
 const PORT = process.env.SERVER_PORT;
 
 // BOT-HOSTING UPTIME MONITOR RPC:
-let reachablePorts = 0;
 
 function delay(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
-
-function checkPort(host, port) {
-  return new Promise((resolve) => {
-    const socket = new net.Socket();
-    socket.setTimeout(5000);
-
-    const cleanup = () => {
-      socket.destroy();
-      socket.removeAllListeners();
-    };
-
-    socket.on('connect', () => {
-      cleanup();
-      resolve(true);
-    });
-
-    socket.on('timeout', () => {
-      cleanup();
-      resolve(false);
-    });
-
-    socket.on('error', (error) => {
-      cleanup();
-      if (error.code === 'ENOTFOUND' || error.code === 'ECONNREFUSED') {
-        resolve(false);
-      } else if (error.code === 'EACCES' || error.code === 'EADDRINUSE') {
-        resolve(true);
-      } else {
-        resolve(false);
-      }
-    });
-
-    socket.connect(port, host);
-  });
-}
-
 
 app.use(express.json());
 
@@ -73,22 +35,6 @@ app.all('/health', async (req, res) => {
 });
 
 app.listen(PORT, () => console.log(`HP running on port ${PORT}`));
-
-async function checkPortsWithConcurrency(host, ports, maxConcurrency) {
-  let reachableCount = 0;
-
-  const batches = [];
-  for (let i = 0; i < ports.length; i += maxConcurrency) {
-    batches.push(ports.slice(i, i + maxConcurrency));
-  }
-
-  for (const batch of batches) {
-    const results = await Promise.all(batch.map((port) => checkPort(host, port)));
-    reachableCount += results.filter((isReachable) => isReachable).length;
-  }
-
-  return reachableCount;
-}
 
 async function sendPostRequest(data) {
   try {
@@ -130,17 +76,13 @@ async function runMonitor() {
     console.log(`[${new Date().toLocaleTimeString()}] Starting port scan...`);
 	let reachableCount = -1;
     
-    if (RPC) {
-	reachableCount = await checkPortsWithConcurrency(node, testPorts, 75);
-    }
     console.log(`[${new Date().toLocaleTimeString()}] Port scan complete. Reachable ports: ${reachableCount}`);
 
-   reachablePorts = reachableCount;
     const stats = await getStats();
      
    await sendPostRequest({
   monitorName: monitor,
-  reachablePorts: reachableCount,
+  reachablePorts: '-2',
   stats
 });
   } catch (err) {
