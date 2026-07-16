@@ -16,7 +16,7 @@ const bodyParser = require('body-parser');
 // CONFIG
 const node = 'node.bot-hosting.net'   // CHANGE node to YOUR NODE Ex: prem-eu1  (IF Your Node is prem-eu1 THEN Put prem-eu1 here NOT eu1)
 const monitor = 'node'   // CHANGE node to YOUR NODE Ex: eu1 (IF Your Node is prem-eu1 THEN Put eu1 here NOT prem-eu1)
-const minutes = 1    // INTERVAL OF CHECKS IN MINUTES, DEFAULT 3 MINUTES. INCREASE IF NEEDED UPTO MAX 60 MINUTES
+const minutes = 1    // INTERVAL OF CHECKS IN MINUTES, DEFAULT 1 MINUTE (3 MINUTES IF RPC TRUE). INCREASE IF NEEDED UPTO MAX 60 MINUTES
 const RPC = false   // DISABLE IF ON Fi (free) NODE or IF YOUR SERVER KEEPS CRASHING RANDOMLY AFTER OR AT PORT CHECK.
 const express = require('express');
 const app = express();
