@@ -12,8 +12,8 @@ const execPromise = util.promisify(exec);
 const bodyParser = require('body-parser');
 
 // CONFIG
-const node = 'node.bot-hosting.net'   // CHANGE to YOUR NODE hostname (e.g. prem-eu1.bot-hosting.net)
-const monitor = 'node'                // CHANGE to YOUR NODE monitor ID (e.g. eu1)
+const node = 'node.bot-hosting.net'   // CHANGE to YOUR NODE's hostname (e.g. prem-eu1.bot-hosting.net)
+const monitor = 'node'                // CHANGE to YOUR NODE's monitor ID (e.g. eu1) from the status page
 const minutes = 1                    // Check interval in minutes (1-60)
 const express = require('express');
 const app = express();
